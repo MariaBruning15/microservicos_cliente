@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  gateway:
+    build: ./gateway
+    container_name: gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      - produtos
+      - pedidos
+      - clientes
+    networks:
+      - app-network
+
+  produtos:
+    build: ./produtos
+    container_name: produtos
+    ports:
+      - "3001:3001"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=produtos_db
+      - PORT=3001
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  pedidos:
+    build: ./pedidos
+    container_name: pedidos
+    ports:
+      - "3002:3002"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=pedidos_db
+      - PORT=3002
+      - CLIENTES_SERVICE_URL=http://clientes:3003
+    depends_on:
+      - postgres
+      - clientes
+    networks:
+      - app-network
+
+  clientes:
+    build: ./clientes
+    container_name: clientes
+    ports:
+      - "3003:3003"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=clientes_db
+      - PORT=3003
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  pgdata:
