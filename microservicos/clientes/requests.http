@@ -1,0 +1,16 @@
+### Criar cliente
+POST http://localhost:3000/clientes
+Content-Type: application/json
+
+{
+  "nome": "Joao",
+  "sobrenome": "Oliveira",
+  "telefone": "46991112222",
+  "email": "joao@email.com"
+}
+
+### Listar clientes
+GET http://localhost:3000/clientes
+
+### Obter cliente por ID
+GET http://localhost:3000/clientes/1
